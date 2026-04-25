@@ -6,8 +6,6 @@ on:
       service: { required: true, type: string }
       image: { required: true, type: string }
       trigger: { required: true, type: string }
-    secrets:
-      SONAR_KEY: { required: true }
 
 jobs:
 
