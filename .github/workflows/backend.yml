@@ -5,7 +5,6 @@ on:
     inputs:
       service: { required: true, type: string }
       image: { required: true, type: string }
-      sonar_key: { required: true, type: string }
       trigger: { required: true, type: string }
 
 jobs:
@@ -28,15 +27,15 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonar.your-domain.com
+          SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
         with:
-          args: -Dsonar.projectKey=${{ inputs.sonar_key }}
+          args: -Dsonar.projectKey=${{ ${{ secrets.SONAR_KEY }} }}
 
       - name: Quality Gate
         uses: SonarSource/sonarqube-quality-gate-action@v1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonar.your-domain.com
+          SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
 
       - name: Snyk
         uses: snyk/actions/node@master
