@@ -116,7 +116,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          repository: YOUR_ORG/main-project-repo
+          repository: printnow-dev/printnow
           event-type: service-image-updated
           client-payload: |
             {
