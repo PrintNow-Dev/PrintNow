@@ -115,7 +115,7 @@ jobs:
       - name: Dispatch
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           repository: YOUR_ORG/main-project-repo
           event-type: service-image-updated
           client-payload: |
