@@ -5,7 +5,6 @@ on:
     inputs:
       service: { required: true, type: string }
       image: { required: true, type: string }
-      sonar_key: { required: true, type: string }
       trigger: { required: true, type: string }
 
 jobs:
