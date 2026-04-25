@@ -105,7 +105,7 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
           scanners: vuln
-          kip-dirs: /usr/local/lib/node_modules/npm
+          skip-dirs: /usr/local/lib/node_modules/npm
 
       - uses: docker/build-push-action@v5
         with:
