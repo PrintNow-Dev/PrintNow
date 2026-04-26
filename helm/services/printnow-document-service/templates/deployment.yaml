@@ -1,10 +1,15 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: document-service
   namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    blueGreen:
+      activeService: document-service
+      previewService: document-service-preview
+      autoPromotionEnabled: false
   selector:
     matchLabels:
       app: document-service
@@ -18,7 +23,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 5002
+            - containerPort: {{ .Values.service.targetPort }}
           envFrom:
             - configMapRef:
                 name: document-service-config
@@ -29,13 +34,13 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 5002
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /health
-              port: 5002
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 20
             periodSeconds: 20
 
