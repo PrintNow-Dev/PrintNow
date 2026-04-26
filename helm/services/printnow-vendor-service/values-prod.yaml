@@ -2,7 +2,7 @@ namespace: prod
 replicaCount: 1
 image:
   repository: praveenx03/printnow-vendor-service
-  tag: v1.1.0
+  tag: v1.1.1
 service:
   type: ClusterIP
   port: 5004
