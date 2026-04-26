@@ -16,6 +16,9 @@ on:
     branches: ["dev"]
     paths:
       - 'helm/services/frontend/values-dev.yaml'
+permissions:
+  contents: read
+  packages: write
 
 jobs:
 
