@@ -1,5 +1,5 @@
 namespace: prod
-replicaCount: 2
+replicaCount: 1
 image:
   repository: praveenx03/printnow-document-service
   tag: v1.1.0
