@@ -48,7 +48,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ github.token }}
-          ref: refs/tags/${{ github.event.release.tag_name }}
           fetch-depth: 0
 
       - name: Set release variables
@@ -71,21 +70,23 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GH_PAT }}
 
       - name: Release service
         run: |
           SERVICE="${RELEASE_SERVICE}"
+          IMAGE_NAME=$(yq '.image.repository' "helm/services/${SERVICE}/values-dev.yaml" | awk -F/ '{print $NF}')
+          IMAGE_REPOSITORY="ghcr.io/printnow-dev/${IMAGE_NAME}"
 
           echo "Releasing $SERVICE"
 
-          docker pull ghcr.io/printnow-dev/${SERVICE}:${SHA_TAG}
+          docker pull ${IMAGE_REPOSITORY}:${SHA_TAG}
 
           docker tag \
-            ghcr.io/printnow-dev/${SERVICE}:${SHA_TAG} \
-            ghcr.io/printnow-dev/${SERVICE}:${RELEASE_TAG}
+            ${IMAGE_REPOSITORY}:${SHA_TAG} \
+            ${IMAGE_REPOSITORY}:${RELEASE_TAG}
 
-          docker push ghcr.io/printnow-dev/${SERVICE}:${RELEASE_TAG}
+          docker push ${IMAGE_REPOSITORY}:${RELEASE_TAG}
 
           yq -i ".image.tag = \"${RELEASE_TAG}\"" \
             helm/services/${SERVICE}/values-prod.yaml
