@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: order-service
-          image: praveenx03/printnow-order-service:v1.1.0
+          image: ghcr.io/printnow-dev/printnow-order-service:v1.1.0
           imagePullPolicy: Always
           ports:
             - containerPort: 5003
