@@ -97,7 +97,7 @@ jobs:
 
       - uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./${{ inputs.service }}
           no-cache: true
           tags: ${{ steps.meta.outputs.image }}
 
@@ -113,7 +113,7 @@ jobs:
 
       - uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./${{ inputs.service }}
           push: true
           tags: ${{ steps.meta.outputs.image }}
 
