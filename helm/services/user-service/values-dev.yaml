@@ -2,7 +2,7 @@ namespace: dev
 replicaCount: 1
 image:
   repository: ghcr.io/printnow-dev/user-service
-  tag: sha-d844963
+  tag: sha-e4fc033
   pullPolicy: Always
 service:
   type: ClusterIP
