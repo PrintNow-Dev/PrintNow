@@ -48,7 +48,7 @@ jobs:
       - name: Checkout repo (prod branch)
         uses: actions/checkout@v4
         with:
-          ref: prod
+          ref: ${{ github.event.release.tag_name }}
 
       - name: Set release variables
         run: |
