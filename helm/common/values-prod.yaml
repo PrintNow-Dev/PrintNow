@@ -8,11 +8,11 @@ mongodb:
   storage: 20Gi
   resources:
     requests:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 100m
+      memory: 128Mi
     limits:
-      cpu: "2"
-      memory: 2Gi
+      cpu: "500m"
+      memory: 512Mi
 gateway:
   className: kgateway
   listenerPort: 80
