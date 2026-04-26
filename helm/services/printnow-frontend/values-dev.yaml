@@ -1,8 +1,8 @@
 namespace: dev
 replicaCount: 1
 image:
-  repository: praveenx03/printnow-frontend
-  tag: sha-57b987e
+  repository: ghcr.io/printnow-dev/printnow-frontend
+  tag: sha-a6ef902
 service:
   type: NodePort
   port: 8080
