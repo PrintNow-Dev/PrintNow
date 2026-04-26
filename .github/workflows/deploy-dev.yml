@@ -38,5 +38,6 @@ jobs:
           username: ${{ secrets.SMTP_USER }}
           password: ${{ secrets.SMTP_PASS }}
           to: ${{ secrets.NOTIFY_EMAIL }}
+          from: "CI/CD Bot <${{ secrets.SMTP_USER }}>"
           subject: "Deploy Dev - ${{ job.status }}"
           body: "Logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
