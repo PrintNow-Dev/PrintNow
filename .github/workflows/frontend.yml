@@ -13,12 +13,6 @@ on:
         required: true
         type: string
 
-  push:
-    branches:
-      - dev
-    paths:
-      - 'helm/services/frontend/values-dev.yaml'
-
 permissions:
   contents: read
   packages: write
@@ -26,7 +20,7 @@ permissions:
 jobs:
 
   pr-checks:
-    if: github.event_name == 'pull_request'
+    if: inputs.trigger == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -35,17 +29,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - run: npm ci
       - run: npm test -- --coverage || true
       - run: npm run build
 
-      - uses: SonarSource/sonarqube-scan-action@v3
+      - name: Sonar
+        uses: SonarSource/sonarqube-scan-action@v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
 
-      - uses: snyk/actions/node@master
+      - name: Snyk
+        uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
@@ -58,22 +55,30 @@ jobs:
           username: ${{ secrets.SMTP_USER }}
           password: ${{ secrets.SMTP_PASS }}
           to: ${{ secrets.NOTIFY_EMAIL }}
-          subject: "${{ job.status == 'success' && '✅' || '❌' }} [${{ inputs.service }}] PR — ${{ github.sha }}"
-          body: "Check logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          from: "CI/CD Bot <${{ secrets.SMTP_USER }}>"
+          subject: "${{ job.status == 'success' && '✅' || '❌' }} [${{ inputs.service }}] PR Checks — ${{ github.sha }}"
+          body: |
+            STATUS: ${{ job.status }}
+            Service: ${{ inputs.service }}
+            Repo: ${{ github.repository }}
+            Actor: ${{ github.actor }}
+            Event: PR
+            Commit: ${{ github.sha }}
+
+            Steps:
+            - Build
+            - Sonar
+            - Snyk
+
+            Logs:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   build:
-    if: github.event_name == 'push'
+    if: inputs.trigger == 'push'
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-
-      # Generate image tag dynamically
-      - id: meta
-        run: |
-          SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          echo "tag=sha-$SHA" >> $GITHUB_OUTPUT
-          echo "image=ghcr.io/printnow-dev/${{ inputs.service }}:sha-$SHA" >> $GITHUB_OUTPUT
 
       # Detect frontend folder
       - id: context
@@ -85,49 +90,55 @@ jobs:
             echo "path=." >> "$GITHUB_OUTPUT"
           fi
 
-      # Login to GHCR
-      - name: Login to GHCR
-        uses: docker/login-action@v3
+      # Generate image tag (USE input image like backend)
+      - id: meta
+        run: |
+          SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "tag=sha-$SHA" >> $GITHUB_OUTPUT
+          echo "image=${{ inputs.image }}:sha-$SHA" >> $GITHUB_OUTPUT
+
+      # Login GHCR
+      - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build locally (for scanning)
-      - name: Build Docker Image
-        uses: docker/build-push-action@v5
+      # Build locally
+      - uses: docker/build-push-action@v5
         with:
           context: ${{ steps.context.outputs.path }}
           load: true
           tags: ${{ steps.meta.outputs.image }}
 
-      # Security scan
-      - name: Trivy Scan
+      # Trivy scan
+      - name: Trivy
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ steps.meta.outputs.image }}
-          severity: CRITICAL,HIGH
+          severity: HIGH,CRITICAL
           exit-code: 1
 
       # Push image
-      - name: Push Docker Image
-        uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v5
         with:
           context: ${{ steps.context.outputs.path }}
           push: true
           tags: ${{ steps.meta.outputs.image }}
 
-      # Trigger main repo (CD)
-      - uses: peter-evans/repository-dispatch@v3
+      # Dispatch to main repo
+      - name: Dispatch
+        uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.GH_PAT }}
-          repository: YOUR_ORG/main-project-repo
+          repository: printnow-dev/printnow
           event-type: service-image-updated
           client-payload: |
             {
               "service_name": "${{ inputs.service }}",
               "image": "${{ steps.meta.outputs.image }}",
-              "sha_tag": "${{ steps.meta.outputs.tag }}"
+              "sha_tag": "${{ steps.meta.outputs.tag }}",
+              "commit_sha": "${{ github.sha }}"
             }
 
       - name: Notify
@@ -139,5 +150,19 @@ jobs:
           username: ${{ secrets.SMTP_USER }}
           password: ${{ secrets.SMTP_PASS }}
           to: ${{ secrets.NOTIFY_EMAIL }}
-          subject: "${{ job.status == 'success' && '✅' || '❌' }} [${{ inputs.service }}] Build"
-          body: "Logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          from: "CI/CD Bot <${{ secrets.SMTP_USER }}>"
+          subject: "${{ job.status == 'success' && '✅' || '❌' }} [${{ inputs.service }}] Build — ${{ steps.meta.outputs.tag }}"
+          body: |
+            STATUS: ${{ job.status }}
+            Service: ${{ inputs.service }}
+            Image: ${{ steps.meta.outputs.image }}
+            Commit: ${{ github.sha }}
+
+            Steps:
+            - Build
+            - Trivy Scan
+            - Push
+            - Dispatch
+
+            Logs:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
