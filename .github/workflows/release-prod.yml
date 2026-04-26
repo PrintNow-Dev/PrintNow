@@ -45,10 +45,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo (prod branch)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}
+          token: ${{ secrets.PAT_TOKEN }}
+          ref: master
+          fetch-depth: 0
 
       - name: Set release variables
         run: |
