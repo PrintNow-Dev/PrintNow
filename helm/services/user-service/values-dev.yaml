@@ -1,7 +1,7 @@
 namespace: dev
 replicaCount: 1
 image:
-  repository: praveenx03/printnow-user-service
+  repository: ghcr.io/printnow-dev/user-service
   tag: sha-eb7ceb6
   pullPolicy: Always
 service:

@@ -1,7 +1,7 @@
 namespace: prod
 replicaCount: 2
 image:
-  repository: praveenx03/printnow-user-service
+  repository: ghcr.io/printnow-dev/user-service
   tag: v1.1.0
   pullPolicy: IfNotPresent
 service:
