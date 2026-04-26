@@ -5,7 +5,6 @@ on:
     inputs:
       service: { required: true }
       image: { required: true }
-      sonar_key: { required: true }
       trigger: { required: true }
   push:
     branches: ["dev"]
