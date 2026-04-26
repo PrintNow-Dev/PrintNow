@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: vendor-service
-          image: praveenx03/printnow-vendor-service:v1.1.0
+          image: ghcr.io/printnow-dev/printnow-vendor-service:v1.1.0
           imagePullPolicy: Always
           ports:
             - containerPort: 5004

@@ -51,7 +51,7 @@ document-service:
   namespace: prod
   replicaCount: 2
   image:
-    repository: praveenx03/printnow-document-service
+    repository: ghcr.io/printnow-dev/printnow-document-service
     tag: v1.1.0
   service:
     type: ClusterIP
@@ -80,7 +80,7 @@ order-service:
   namespace: prod
   replicaCount: 2
   image:
-    repository: praveenx03/printnow-order-service
+    repository: ghcr.io/printnow-dev/printnow-order-service
     tag: v1.1.0
     pullPolicy: IfNotPresent
   service:
@@ -109,7 +109,7 @@ vendor-service:
   namespace: prod
   replicaCount: 2
   image:
-    repository: praveenx03/printnow-vendor-service
+    repository: ghcr.io/printnow-dev/printnow-vendor-service
     tag: v1.1.0
   service:
     type: ClusterIP
@@ -137,7 +137,7 @@ frontend:
   namespace: prod
   replicaCount: 2
   image:
-    repository: praveenx03/printnow-frontend
+    repository: ghcr.io/printnow-dev/printnow-frontend
     tag: v1.1.0
   service:
     type: NodePort

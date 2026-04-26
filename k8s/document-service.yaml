@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: document-service
-          image: praveenx03/printnow-document-service:v1.1.0
+          image: ghcr.io/printnow-dev/printnow-document-service:v1.1.0
           imagePullPolicy: Always
           ports:
             - containerPort: 5002

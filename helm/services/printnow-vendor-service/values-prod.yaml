@@ -1,7 +1,7 @@
 namespace: prod
 replicaCount: 1
 image:
-  repository: praveenx03/printnow-vendor-service
+  repository: ghcr.io/printnow-dev/printnow-vendor-service
   tag: v1.1.1
 service:
   type: ClusterIP
