@@ -3,18 +3,24 @@ name: Frontend CI/CD
 on:
   workflow_call:
     inputs:
-      service: { required: true }
-      image: { required: true }
-      trigger: { required: true }
+      service:
+        required: true
+        type: string
+      image:
+        required: true
+        type: string
+      trigger:
+        required: true
+        type: string
   push:
     branches: ["dev"]
     paths:
-      - 'helm/services/frontend/**'
+      - 'helm/services/frontend/values-dev.yaml'
 
 jobs:
 
   pr-checks:
-    if: inputs.trigger == 'pull_request'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -51,7 +57,7 @@ jobs:
 
 
   build:
-    if: inputs.trigger == 'push'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
