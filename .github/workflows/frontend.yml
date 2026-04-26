@@ -68,12 +68,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Generate image tag dynamically
       - id: meta
         run: |
           SHA=$(echo ${{ github.sha }} | cut -c1-7)
           echo "tag=sha-$SHA" >> $GITHUB_OUTPUT
-          echo "image=${{ inputs.image }}:sha-$SHA" >> $GITHUB_OUTPUT
+          echo "image=ghcr.io/printnow-dev/${{ inputs.service }}:sha-$SHA" >> $GITHUB_OUTPUT
 
+      # Detect frontend folder
       - id: context
         shell: bash
         run: |
@@ -84,13 +86,14 @@ jobs:
           fi
 
       # Login to GHCR
-      - uses: docker/login-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GH_PAT }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build image locally (for Trivy scan)
+      # Build locally (for scanning)
       - name: Build Docker Image
         uses: docker/build-push-action@v5
         with:
@@ -114,7 +117,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.image }}
 
-      # Notify main repo (CD trigger)
+      # Trigger main repo (CD)
       - uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.GH_PAT }}
