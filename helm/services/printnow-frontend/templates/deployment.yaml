@@ -1,10 +1,15 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: frontend
   namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    blueGreen:
+      activeService: frontend
+      previewService: frontend-preview
+      autoPromotionEnabled: false
   selector:
     matchLabels:
       app: frontend
@@ -18,7 +23,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8080
+            - containerPort: {{ .Values.service.targetPort }}
           envFrom:
             - configMapRef:
                 name: frontend-config
@@ -29,13 +34,13 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 8080
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /health
-              port: 8080
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 20
             periodSeconds: 20
 

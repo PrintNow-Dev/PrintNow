@@ -1,10 +1,15 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: order-service
   namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    blueGreen:
+      activeService: order-service
+      previewService: order-service-preview
+      autoPromotionEnabled: false
   selector:
     matchLabels:
       app: order-service
@@ -18,7 +23,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 5003
+            - containerPort: {{ .Values.service.targetPort }}
           envFrom:
             - configMapRef:
                 name: order-service-config
@@ -29,13 +34,13 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 5003
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /health
-              port: 5003
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 20
             periodSeconds: 20
 
