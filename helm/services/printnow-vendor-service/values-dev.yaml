@@ -1,8 +1,8 @@
 namespace: dev
 replicaCount: 1
 image:
-  repository: praveenx03/printnow-vendor-service
-  tag: v1.1.0
+  repository: ghcr.io/printnow-dev/printnow-vendor-service
+  tag: sha-e2746fd
 service:
   type: ClusterIP
   port: 5004
@@ -24,6 +24,3 @@ resources:
   limits:
     cpu: 500m
     memory: 512Mi
-
-
-
