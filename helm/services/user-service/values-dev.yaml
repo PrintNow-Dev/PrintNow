@@ -2,7 +2,7 @@ namespace: dev
 replicaCount: 1
 image:
   repository: praveenx03/printnow-user-service
-  tag: sha-b334431
+  tag: sha-5e54e0c
   pullPolicy: Always
 service:
   type: ClusterIP
