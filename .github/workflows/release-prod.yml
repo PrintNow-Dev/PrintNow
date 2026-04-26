@@ -63,8 +63,6 @@ jobs:
             exit 1
           fi
 
-          echo "SHA_TAG=sha-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -77,8 +75,15 @@ jobs:
           SERVICE="${RELEASE_SERVICE}"
           IMAGE_NAME=$(yq '.image.repository' "helm/services/${SERVICE}/values-dev.yaml" | awk -F/ '{print $NF}')
           IMAGE_REPOSITORY="ghcr.io/printnow-dev/${IMAGE_NAME}"
+          SHA_TAG=$(yq '.image.tag' "helm/services/${SERVICE}/values-dev.yaml")
 
           echo "Releasing $SERVICE"
+          echo "Using source image tag ${SHA_TAG}"
+
+          if [[ ! "$SHA_TAG" =~ ^sha- ]]; then
+            echo "Invalid dev image tag for ${SERVICE}: ${SHA_TAG}"
+            exit 1
+          fi
 
           docker pull ${IMAGE_REPOSITORY}:${SHA_TAG}
 
