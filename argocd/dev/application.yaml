@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/printnow-dev/printnow.git
-    targetRevision: develop
+    targetRevision: dev
     path: helm/common
     helm:
       valueFiles:
@@ -29,7 +29,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/printnow-dev/printnow.git
-    targetRevision: develop
+    targetRevision: dev
     path: helm/services/user-service
     helm:
       valueFiles:
@@ -51,7 +51,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/printnow-dev/printnow.git
-    targetRevision: develop
+    targetRevision: dev
     path: helm/services/printnow-document-service
     helm:
       valueFiles:
@@ -73,7 +73,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/printnow-dev/printnow.git
-    targetRevision: develop
+    targetRevision: dev
     path: helm/services/printnow-order-service
     helm:
       valueFiles:
@@ -95,7 +95,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/printnow-dev/printnow.git
-    targetRevision: develop
+    targetRevision: dev
     path: helm/services/printnow-vendor-service
     helm:
       valueFiles:
@@ -117,7 +117,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/printnow-dev/printnow.git
-    targetRevision: develop
+    targetRevision: dev
     path: helm/services/printnow-frontend
     helm:
       valueFiles:
