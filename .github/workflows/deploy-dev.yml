@@ -19,7 +19,7 @@ jobs:
           SERVICE=${{ github.event.client_payload.service_name }}
           TAG=${{ github.event.client_payload.sha_tag }}
 
-          yq -i ".image.tag = \"$TAG\"" helm/$SERVICE/values-dev.yaml
+          yq -i ".image.tag = \"$TAG\"" helm/services/$SERVICE/values-dev.yaml
 
       - name: Commit
         run: |
