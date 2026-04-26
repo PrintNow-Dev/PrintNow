@@ -47,6 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: master
           token: ${{ github.token }}
           fetch-depth: 0
 
@@ -102,7 +103,7 @@ jobs:
 
           git add helm/services/${RELEASE_SERVICE}/values-prod.yaml
           git commit -m "release ${RELEASE_SERVICE} -> ${RELEASE_TAG}" || echo "No changes"
-          git push
+          git push origin HEAD:master
 
       - name: Notify
         if: always()
