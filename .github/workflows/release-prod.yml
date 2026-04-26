@@ -74,21 +74,20 @@ jobs:
         run: |
           SERVICE="${RELEASE_SERVICE}"
           IMAGE_REPOSITORY=$(yq '.image.repository' "helm/services/${SERVICE}/values-dev.yaml")
-          SHA_TAG=$(yq '.image.tag' "helm/services/${SERVICE}/values-dev.yaml")
+          SOURCE_TAG=$(yq '.image.tag' "helm/services/${SERVICE}/values-dev.yaml")
 
           echo "Releasing $SERVICE"
           echo "Using image repository ${IMAGE_REPOSITORY}"
-          echo "Using source image tag ${SHA_TAG}"
+          echo "Using source image tag ${SOURCE_TAG}"
 
-          if [[ ! "$SHA_TAG" =~ ^sha- ]]; then
-            echo "Invalid dev image tag for ${SERVICE}: ${SHA_TAG}"
+          if ! docker pull ${IMAGE_REPOSITORY}:${SOURCE_TAG}; then
+            echo "Source image not found: ${IMAGE_REPOSITORY}:${SOURCE_TAG}"
+            echo "Release expects the dev image tag in helm/services/${SERVICE}/values-dev.yaml to already exist in the registry."
             exit 1
           fi
 
-          docker pull ${IMAGE_REPOSITORY}:${SHA_TAG}
-
           docker tag \
-            ${IMAGE_REPOSITORY}:${SHA_TAG} \
+            ${IMAGE_REPOSITORY}:${SOURCE_TAG} \
             ${IMAGE_REPOSITORY}:${RELEASE_TAG}
 
           docker push ${IMAGE_REPOSITORY}:${RELEASE_TAG}
