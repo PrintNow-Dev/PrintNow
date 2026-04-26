@@ -107,8 +107,8 @@ jobs:
       # Build locally
       - uses: docker/build-push-action@v5
         with:
-          context: ${{ steps.context.outputs.path }}
-          load: true
+          context: .
+          push: true
           tags: ${{ steps.meta.outputs.image }}
 
       # Trivy scan
@@ -122,7 +122,7 @@ jobs:
       # Push image
       - uses: docker/build-push-action@v5
         with:
-          context: ${{ steps.context.outputs.path }}
+          context: .
           push: true
           tags: ${{ steps.meta.outputs.image }}
 
