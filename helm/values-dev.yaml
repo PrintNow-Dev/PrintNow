@@ -1,0 +1,161 @@
+printnow-common:
+  targetNamespace: dev
+  storageClass:
+    name: printnow-sc
+    server: 10.0.1.140
+    share: /var/nfs/general/printnow
+  mongodb:
+    image: mongo:7.0.12
+    storage: 10Gi
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+  gateway:
+    className: kgateway
+    listenerPort: 80
+
+user-service:
+  namespace: dev
+  replicaCount: 1
+  image:
+    repository: ghcr.io/printnow-dev/user-service
+    tag: sha-e4fc033
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 5001
+    targetPort: 5001
+  config:
+    PORT: "5001"
+    NODE_ENV: development
+    MONGO_URI: mongodb://mongodb-0.mongodb.dev.svc.cluster.local:27017/printnow
+    USERS_COLLECTION: users
+    JWT_EXPIRES_IN: 1d
+  secret:
+    JWT_SECRET: dev-printnow-jwt-secret-2026
+    RAZORPAY_KEY_ID: rzp_dev_printnow_user
+    RAZORPAY_SECRET: dev-printnow-user-razorpay-secret
+  resources:
+    requests:
+      cpu: 150m
+      memory: 192Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+document-service:
+  namespace: dev
+  replicaCount: 1
+  image:
+    repository: ghcr.io/printnow-dev/printnow-document-service
+    tag: sha-3e1873c
+  service:
+    type: ClusterIP
+    port: 5002
+    targetPort: 5002
+  config:
+    PORT: "5002"
+    NODE_ENV: development
+    MONGO_URI: mongodb://mongodb-0.mongodb.dev.svc.cluster.local:27017/printnow
+    DOCUMENTS_COLLECTION: documents
+    UPLOAD_DIR: uploads
+    MAX_UPLOAD_MB: "25"
+  secret:
+    JWT_SECRET: dev-printnow-jwt-secret-2026
+    RAZORPAY_KEY_ID: rzp_dev_printnow_document
+    RAZORPAY_SECRET: dev-printnow-document-razorpay-secret
+  resources:
+    requests:
+      cpu: 150m
+      memory: 192Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+order-service:
+  namespace: dev
+  replicaCount: 1
+  image:
+    repository: ghcr.io/printnow-dev/printnow-order-service
+    tag: sha-3f7fdc3
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 5003
+    targetPort: 5003
+  config:
+    PORT: "5003"
+    NODE_ENV: development
+    MONGO_URI: mongodb://mongodb-0.mongodb.dev.svc.cluster.local:27017/printnow
+    ORDERS_COLLECTION: orders
+    ORDER_TIMEOUT_MINUTES: "30"
+  secret:
+    JWT_SECRET: dev-printnow-jwt-secret-2026
+    RAZORPAY_KEY_ID: rzp_test_SgxwwTh05ycq20
+    RAZORPAY_SECRET: ib19bXnXUxULKn56i0kv7HsQ
+  resources:
+    requests:
+      cpu: 150m
+      memory: 192Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+vendor-service:
+  namespace: dev
+  replicaCount: 1
+  image:
+    repository: ghcr.io/printnow-dev/printnow-vendor-service
+    tag: v1.1.0
+  service:
+    type: ClusterIP
+    port: 5004
+    targetPort: 5004
+  config:
+    PORT: "5004"
+    NODE_ENV: development
+    MONGO_URI: mongodb://mongodb-0.mongodb.dev.svc.cluster.local:27017/printnow
+    VENDOR_REGION: local
+    MATCHING_MODE: distance
+  secret:
+    JWT_SECRET: dev-printnow-jwt-secret-2026
+    RAZORPAY_KEY_ID: rzp_dev_printnow_vendor
+    RAZORPAY_SECRET: dev-printnow-vendor-razorpay-secret
+  resources:
+    requests:
+      cpu: 150m
+      memory: 192Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+frontend:
+  namespace: dev
+  replicaCount: 1
+  image:
+    repository: ghcr.io/printnow-dev/printnow-frontend
+    tag: sha-a6ef902
+  service:
+    type: NodePort
+    port: 8080
+    targetPort: 8080
+  config:
+    PORT: "8080"
+    NODE_ENV: development
+    API_BASE_PATH: /api
+    DOCUMENT_BASE_PATH: /uploads
+  secret:
+    JWT_SECRET: dev-printnow-jwt-secret-2026
+    RAZORPAY_KEY_ID: rzp_dev_printnow_frontend
+    RAZORPAY_SECRET: dev-printnow-frontend-razorpay-secret
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
