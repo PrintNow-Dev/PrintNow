@@ -2,7 +2,7 @@ namespace: dev
 replicaCount: 1
 image:
   repository: praveenx03/printnow-user-service
-  tag: v1.1.0
+  tag: sha-eb7ceb6
   pullPolicy: Always
 service:
   type: ClusterIP
@@ -25,6 +25,3 @@ resources:
   limits:
     cpu: 500m
     memory: 512Mi
-
-
-
