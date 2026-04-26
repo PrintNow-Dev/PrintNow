@@ -1,22 +1,110 @@
+# name: Release Prod
+
+# on:
+#   release:
+#     types: [published]
+
+# jobs:
+#   release:
+#     runs-on: ubuntu-latest
+
+#     strategy:
+#       matrix:
+#         service: [user-service, web-app]
+
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           ref: prod
+#           token: ${{ secrets.GH_PAT }}
+
+#       - name: Notify
+#         if: always()
+#         uses: dawidd6/action-send-mail@v3
+#         with:
+#           server_address: ${{ secrets.SMTP_HOST }}
+#           server_port: ${{ secrets.SMTP_PORT }}
+#           username: ${{ secrets.SMTP_USER }}
+#           password: ${{ secrets.SMTP_PASS }}
+#           to: ${{ secrets.NOTIFY_EMAIL }}
+#           subject: "Prod Release - ${{ job.status }}"
+#           body: "Logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
 name: Release Prod
 
 on:
   release:
     types: [published]
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        service: [user-service, web-app]
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo (prod branch)
+        uses: actions/checkout@v4
         with:
           ref: prod
-          token: ${{ secrets.GH_PAT }}
+
+      - name: Set release variables
+        run: |
+          echo "RELEASE_TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+
+          echo "SHA_TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release user-service
+        run: |
+          SERVICE=user-service
+
+          echo "Releasing $SERVICE"
+
+          docker pull ghcr.io/printnow-dev/${SERVICE}:${SHA_TAG}
+
+          docker tag \
+            ghcr.io/printnow-dev/${SERVICE}:${SHA_TAG} \
+            ghcr.io/printnow-dev/${SERVICE}:${RELEASE_TAG}
+
+          docker push ghcr.io/printnow-dev/${SERVICE}:${RELEASE_TAG}
+
+          yq -i ".image.tag = \"${RELEASE_TAG}\"" \
+            helm/services/${SERVICE}/values-prod.yaml
+
+      - name: Release frontend
+        run: |
+          SERVICE=frontend
+
+          echo "Releasing $SERVICE"
+
+          docker pull ghcr.io/printnow-dev/${SERVICE}:${SHA_TAG}
+
+          docker tag \
+            ghcr.io/printnow-dev/${SERVICE}:${SHA_TAG} \
+            ghcr.io/printnow-dev/${SERVICE}:${RELEASE_TAG}
+
+          docker push ghcr.io/printnow-dev/${SERVICE}:${RELEASE_TAG}
+
+          yq -i ".image.tag = \"${RELEASE_TAG}\"" \
+            helm/services/${SERVICE}/values-prod.yaml
+
+      - name: Commit & push Helm updates
+        run: |
+          git config user.name "ci-bot"
+          git config user.email "ci@bot.com"
+
+          git add helm/services/*/values-prod.yaml
+          git commit -m "release all services → ${RELEASE_TAG}" || echo "No changes"
+          git push
 
       - name: Notify
         if: always()
@@ -27,5 +115,11 @@ jobs:
           username: ${{ secrets.SMTP_USER }}
           password: ${{ secrets.SMTP_PASS }}
           to: ${{ secrets.NOTIFY_EMAIL }}
+          from: "CI/CD Bot <${{ secrets.SMTP_USER }}>"
           subject: "Prod Release - ${{ job.status }}"
-          body: "Logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          body: |
+            Release: ${{ github.event.release.tag_name }}
+            Status: ${{ job.status }}
+
+            Logs:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
