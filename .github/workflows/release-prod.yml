@@ -73,11 +73,11 @@ jobs:
       - name: Release service
         run: |
           SERVICE="${RELEASE_SERVICE}"
-          IMAGE_NAME=$(yq '.image.repository' "helm/services/${SERVICE}/values-dev.yaml" | awk -F/ '{print $NF}')
-          IMAGE_REPOSITORY="ghcr.io/printnow-dev/${IMAGE_NAME}"
+          IMAGE_REPOSITORY=$(yq '.image.repository' "helm/services/${SERVICE}/values-dev.yaml")
           SHA_TAG=$(yq '.image.tag' "helm/services/${SERVICE}/values-dev.yaml")
 
           echo "Releasing $SERVICE"
+          echo "Using image repository ${IMAGE_REPOSITORY}"
           echo "Using source image tag ${SHA_TAG}"
 
           if [[ ! "$SHA_TAG" =~ ^sha- ]]; then
