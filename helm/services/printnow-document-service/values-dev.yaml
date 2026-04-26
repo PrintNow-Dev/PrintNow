@@ -1,8 +1,8 @@
 namespace: dev
 replicaCount: 1
 image:
-  repository: praveenx03/printnow-document-service
-  tag: v1.1.0
+  repository: ghcr.io/printnow-dev/printnow-document-service
+  tag: sha-3e1873c
 service:
   type: ClusterIP
   port: 5002
@@ -25,6 +25,3 @@ resources:
   limits:
     cpu: 500m
     memory: 512Mi
-
-
-
