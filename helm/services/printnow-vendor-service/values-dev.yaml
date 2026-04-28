@@ -2,7 +2,7 @@ namespace: dev
 replicaCount: 1
 image:
   repository: ghcr.io/printnow-dev/printnow-vendor-service
-  tag: sha-c75a908
+  tag: sha-4b06b46
 service:
   type: ClusterIP
   port: 5004
